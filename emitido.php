@@ -24,6 +24,7 @@ echo '</pre>';
  <body>
 <div class="col-md-12">
     <h1>Libros de iva Emitidos</h1>
+    <p><?php echo 'Fecha inicio:'.$libroIvas->getFecha_inicial();?></p>
     <table class="table">
   <thead>
     <tr>

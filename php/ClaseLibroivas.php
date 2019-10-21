@@ -1,8 +1,8 @@
 <?php
 include_once ('ClaseModeloP.php');
 Class LibroIvas extends ModeloP {
-    private $fecha_inicio = date();
-    private $fecha_final = date();
+    private $fecha_inicio;
+    private $fecha_final;
 
     
     public function comprobarPost($post=''){
@@ -13,6 +13,10 @@ Class LibroIvas extends ModeloP {
         if (isset($post['soportado'])) {
             $ok = 'OK';
         }
+        
+        $this->fecha_inicio = $_POST['fecha_inicio'];
+        $this->fecha_final = $_POST['fecha_final'];
+
         return $ok;
     }
    
@@ -42,7 +46,8 @@ Class LibroIvas extends ModeloP {
     }
 
     public function getEmitidos(){
-        $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47700000" AND `SUBCTA`<="47700099"  ORDER BY `FECHA` ASC';
+        $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47700000" AND `SUBCTA`<="47700099" AND FECHA>="'
+			  .$this->fecha_inicio.'" AND FECHA<="'.$this->fecha_final.'" ORDER BY `FECHA` ASC';
         $registros = parent::query($sql,'SELECT');
         // Obtenemos datos que nos falta.
         $registros = $this->setMasDatos($registros,'emitidos');
@@ -52,7 +57,9 @@ Class LibroIvas extends ModeloP {
 
     }
      public function getSoportados(){
-        $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47200000" AND `SUBCTA`<="47200099"  ORDER BY `FECHA` ASC ';
+        $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47200000" AND `SUBCTA`<="47200099" AND FECHA>="'
+			  .$this->fecha_inicio.'" AND FECHA<="'.$this->fecha_final.'" ORDER BY `FECHA` ASC ';
+		error_log($sql);
         $registros = parent::query($sql,'SELECT');
         $registros = $this->setMasDatos($registros,'soportados');
 
@@ -94,6 +101,14 @@ Class LibroIvas extends ModeloP {
 
     }
 
-    
+    public function getFecha_inicial(){
+		
+			return $this->fecha_inicio;
+	}
+	
+	public function getFecha_final(){
+		
+			return $this->fecha_final;
+	}
 
 }
