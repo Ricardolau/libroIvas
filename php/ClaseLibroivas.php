@@ -81,10 +81,23 @@ Class LibroIvas extends ModeloP {
             $datos_contra = parent::query($sql,'SELECT');
             $registros['items'][$key]->{'nif'}     = $datos_contra['items'][0]->NIF;
             $registros['items'][$key]->{'nombre'}  = $datos_contra['items'][0]->TITULO;
-            if ($tipo = 'emitidos'){
+            if ($tipo === 'emitidos'){
                 $cuota_iva= $registro->EUROHABER;
             } else {
                 $cuota_iva= $registro->EURODEBE;
+                // Si existe HABER, quiere decir que la bas es negativo y el iva tambien.
+                if (floatval($registro->EUROHABER) >0){
+                    error_log('tipo'.gettype($registro->EUROHABER));
+                    $registro->BASEEURO =-$registro->BASEEURO ;
+                    $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
+                    $cuota_iva= $registro->EUROHABER*(-1);
+                    $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
+                    $registros['items'][$key]->EURODEBE = $cuota_iva;
+
+
+                    error_log('Cuota:'.$cuota_iva.' Base:'. $registro->BASEEURO);
+                }
+
             }
             
             $total = $total+($registro->BASEEURO +$cuota_iva);

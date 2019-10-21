@@ -94,6 +94,8 @@ echo '</pre>';
             $suma['base_21'] = $suma['base_21']+$registro->BASEEURO;
             $suma['iva_21'] = $suma['iva_21']+$registro->EUROHABER;
         }
+        $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
+        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EUROHABER;
         //~ //foreach ($registros as $key=>$registro) {
         //~ if($key <10){
         //~ echo '<tr><th><pre>';
@@ -131,10 +133,12 @@ echo '</pre>';
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
-            <td></td>
-            <td>Total</td>
-            <td>'.$suma['total'].'</td>'
+            <td><b>TOTAL</b></td>
+            <td><b>'.$suma['totalBases'].'</b></td>'
+            .'<td></td>'
+            .'</td><td><b>'.$suma['totalCuotas'].'</b></td>'
+            .'</td><td><b>'.$suma['total'].'</b></td>'
+
         .'</td></tr>';
     ?>
   </tbody>

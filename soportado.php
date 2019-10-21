@@ -84,18 +84,20 @@ echo '</pre>';
         if (isset($registro->total)){
             $suma['total'] = $suma['total'] +$registro->total;
         }
-        if ($registro->IVA==4.00){
+        if ($registro->IVA==="4.00"){
             $suma['base_4'] = $suma['base_4']+$registro->BASEEURO;
             $suma['iva_4'] = $suma['iva_4']+$registro->EURODEBE;
         }
-        if ($registro->IVA==10.00){
+        if ($registro->IVA==="10.00"){
             $suma['base_10'] = $suma['base_10']+$registro->BASEEURO;
             $suma['iva_10'] = $suma['iva_10']+$registro->EURODEBE;
         }
-        if ($registro->IVA==21.00){
+        if ($registro->IVA==="21.00"){
             $suma['base_21'] = $suma['base_21']+$registro->BASEEURO;
             $suma['iva_21'] = $suma['iva_21']+$registro->EURODEBE;
         }
+        $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
+        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EURODEBE;
         //~ //foreach ($registros as $key=>$registro) {
         //~ if($key <10){
         //~ echo '<tr><th><pre>';
@@ -137,33 +139,42 @@ echo '</pre>';
             <td></td>
             <td></td>
             <td></td>
-            <td>Total</td>
-            <td>'.$suma['total'].'</td>'
+            <td><b>TOTAL</b></td>
+            <td><b>'.$suma['totalBases'].'</b></td>'
+            .'<td></td>'
+            .'</td><td><b>'.$suma['totalCuotas'].'</b></td>'
+            .'</td><td><b>'.$suma['total'].'</b></td>'
+
         .'</td></tr>';
     ?>
   </tbody>
 </table>
-<h4>Desglose de ivas</h4>
-<table class="table">
-    <thead>
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">Base</th>
-        <th scope="col">Cuota</th>
-    </tr>
-  </thead>
-  <tbody>
-    <?php
-     echo '<tr><th> 4%</th><td>'.$suma['base_4'].'<td>'.$suma['iva_4'].'</td>'
-        .'</td></tr>';
-     echo '<tr><th>10%</th><td>'.$suma['base_10'].'<td>'.$suma['iva_10'].'</td>'
-        .'</td></tr>';
-    echo '<tr><th>21%</th><td>'.$suma['base_21'].'<td>'.$suma['iva_21'].'</td>'
-        .'</td></tr>';
-    
-    ?>
-</tbody>
-</table>
+<div class="col-sm-6">
+    <h4>Desglose de ivas</h4>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Base</th>
+            <th scope="col">Cuota</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+         echo '<tr><th> 4%</th><td>'
+            .number_format ($suma['base_4'],2,"."," ").'<td>'.number_format ($suma['iva_4'],2,"."," ").'</td>'
+            .'</td></tr>';
+        echo '<tr><th> 10%</th><td>'
+            .number_format ($suma['base_10'],2,"."," ").'<td>'.number_format ($suma['iva_10'],2,"."," ").'</td>'
+            .'</td></tr>';
+        echo '<tr><th> 4%</th><td>'
+            .number_format ($suma['base_21'],2,"."," ").'<td>'.number_format ($suma['iva_21'],2,"."," ").'</td>'
+            .'</td></tr>';
+        
+        ?>
+    </tbody>
+    </table>
+</div>
 </div>
 </body>
 </html>
