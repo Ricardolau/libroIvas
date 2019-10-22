@@ -90,7 +90,7 @@ $opciones = $libroIvas->campos;
                             'n_asiento' => $registro->ASIEN,
                             'subcta'    => $registro->SUBCTA,
                             'contra'    => $registro->CONTRA,
-                            'n_factura_tpv' => $registro->DOCUMENTO
+                            'documento' => $registro->DOCUMENTO
                         );
         } else {
             $row= '';
@@ -99,22 +99,22 @@ $opciones = $libroIvas->campos;
                             'n_asiento' => '',
                             'subcta'    => '',
                             'contra'    => '',
-                            'n_factura_tpv' => ''
+                            'documento' => ''
                         );
         }
         if (isset($registro->total)){
-            $suma['total'] = $suma['total'] +$registro->total;
+            $suma['total'] += $registro->total;
         }
         
-        $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
-        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EURODEBE;
+        $suma['totalBases'] += $registro->BASEEURO;;
+        $suma['totalCuotas'] += $registro->EURODEBE;
         $trimestres = $libroIvas->getTrimestres();
         foreach ($trimestres as $k=>$trimestre){
             if ($registro->FECHA >=$trimestre['fi'] and $registro->FECHA <=$trimestre['ff']){
                 foreach ($ivas as $x=>$iva) {
                     $str_iva = $x.'.00';
                     if ($registro->IVA===$str_iva){
-                        $suma['base'][$k][$x]+= $registro->BASEEURO;
+                        $suma['base'][$k][$x] += $registro->BASEEURO;
                         $suma['cuota_iva'][$k][$x] += $registro->EURODEBE;
                     }
                 }
@@ -130,7 +130,7 @@ $opciones = $libroIvas->campos;
         <td><?php echo $datos['n_asiento'];?></td>
     <?php }
           if (isset($opciones['documento'])){?>
-        <td><?php echo $datos['n_factura_tpv'];?></td>
+        <td><?php echo $datos['documento'];?></td>
     <?php } ?>
         <td><?php echo $datos['fecha'];?></td>
     <?php

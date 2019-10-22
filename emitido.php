@@ -106,8 +106,8 @@ $opciones = $libroIvas->campos;
             $suma['total'] = $suma['total'] +$registro->total;
         }
         
-        $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
-        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EUROHABER;
+        $suma['totalBases'] += $registro->BASEEURO;;
+        $suma['totalCuotas']+= $registro->EUROHABER;
         $trimestres = $libroIvas->getTrimestres();
         foreach ($trimestres as $k=>$trimestre){
             if ($registro->FECHA >=$trimestre['fi'] and $registro->FECHA <=$trimestre['ff']){
