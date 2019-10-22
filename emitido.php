@@ -9,10 +9,8 @@ if ($libroIvas->comprobarPost($_POST) === 'KO'){
 
 }
 $registros = $libroIvas->getEmitidos();
+$opciones = $libroIvas->campos;
 
-echo '<pre>';
-print_r($_POST);
-echo '</pre>';
 ?>
 <html>
  <head>
@@ -23,22 +21,38 @@ echo '</pre>';
  </head>
  <body>
 <div class="col-md-12">
-    <h1>Libros de iva Emitidos</h1>
-    <p><?php echo 'Fecha inicio:'.$libroIvas->getFecha_inicial();?></p>
+    <?php echo $libroIvas->getTituloInforme();?>
     <table class="table">
   <thead>
     <tr>
-        <th scope="col">#</th>
-        <th scope="col">Asiento</th>
-        <th scope="col">Fecha</th>
-        <th scope="col">Subcta</th>
-        <th scope="col">contrapartida <br/> nombre</th>
-        <th scope="col">NIF</th>
-        <th scope="col">Concepto</th>
-        <th scope="col">Base</th>
-        <th scope="col">iva</th>
-        <th scope="col">Cuota Iva</th>
-        <th scope="col">Total Factura</th>
+            <th scope="col">#</th>
+        <?php
+        if (isset($opciones['asiento'])){?>
+            <th scope="col">Asiento</th>
+        <?php
+        }
+        if (isset($opciones['documento'])){?>
+            <th scope="col">Documento</th>
+        <?php
+        }
+        ?>
+            <th scope="col">Fecha</th>
+        <?php
+        if (isset($opciones['subcta'])){?>
+            <th scope="col">Subcta</th>
+        <?php
+        }
+        if (isset($opciones['contrapartida'])){?>
+            <th scope="col">contrapartida <br/> nombre</th>
+         <?php
+        }
+        ?>
+            <th scope="col">NIF</th>
+            <th scope="col">Concepto</th>
+            <th scope="col">Base</th>
+            <th scope="col">iva</th>
+            <th scope="col">Cuota Iva</th>
+            <th scope="col">Total Factura</th>
 
 
     </tr>
@@ -47,7 +61,7 @@ echo '</pre>';
     <?php
     $key = 0;
     $asiento_anterior = 0;
-    $ivas = array(  '4'=> 0,'10'=>0,'21'=>0);
+    $ivas = $libroIvas->ivas;
     $suma = array( 'total' =>0,
                    'base' => array (1 =>$ivas,
                                     2 =>$ivas,
@@ -70,12 +84,13 @@ echo '</pre>';
             $row = $key;
             $class_row = ' class="inicio"';
             $asiento_anterior=$asiento;
-            $fecha = date_create_from_format('Y-m-d', $registro->FECHA);
-            $fecha = date_format($fecha,'d-m-Y');
+            $fecha = $libroIvas->getfecha($registro->FECHA);
+            
             $datos = array( 'fecha'     => $fecha,
                             'n_asiento' => $registro->ASIEN,
                             'subcta'    => $registro->SUBCTA,
-                            'contra'    => $registro->CONTRA.' '.$registro->nombre
+                            'contra'    => $registro->CONTRA.' '.$registro->nombre,
+                            'documento' => $registro->DOCUMENTO
                         );
         } else {
             $row= '';
@@ -83,7 +98,8 @@ echo '</pre>';
             $datos = array( 'fecha'     => '',
                             'n_asiento' => '',
                             'subcta'    => '',
-                            'contra'    => ''
+                            'contra'    => '',
+                            'documento' => ''
                         );
         }
         if (isset($registro->total)){
@@ -91,21 +107,16 @@ echo '</pre>';
         }
         
         $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
-        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EURODEBE;
+        $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EUROHABER;
         $trimestres = $libroIvas->getTrimestres();
         foreach ($trimestres as $k=>$trimestre){
             if ($registro->FECHA >=$trimestre['fi'] and $registro->FECHA <=$trimestre['ff']){
-                if ($registro->IVA==="4.00"){
-                    $suma['base'][$k]['4']= $suma['base'][$k]['4']+$registro->BASEEURO;
-                    $suma['cuota_iva'][$k]['4'] = $suma['cuota_iva'][$k]['4']+$registro->EUROHABER;
-                }
-                if ($registro->IVA==="10.00"){
-                     $suma['base'][$k]['10']= $suma['base'][$k]['10']+$registro->BASEEURO;
-                    $suma['cuota_iva'][$k]['10'] = $suma['cuota_iva'][$k]['10']+$registro->EUROHABER;
-                }
-                if ($registro->IVA==="21.00"){
-                    $suma['base'][$k]['21']= $suma['base'][$k]['21']+$registro->BASEEURO;
-                    $suma['cuota_iva'][$k]['21'] = $suma['cuota_iva'][$k]['21']+$registro->EUROHABER;
+                foreach ($ivas as $x=>$iva) {
+                    $str_iva = $x.'.00';
+                    if ($registro->IVA===$str_iva){
+                        $suma['base'][$k][$x]+= $registro->BASEEURO;
+                        $suma['cuota_iva'][$k][$x] += $registro->EUROHABER;
+                    }
                 }
             }
         }
@@ -114,10 +125,20 @@ echo '</pre>';
 
     <tr<?php echo $class_row;?>>
         <th scope="row"><?php echo $row;?></th>
+    <?php if (isset($opciones['asiento'])){?>
         <td><?php echo $datos['n_asiento'];?></td>
+    <?php }
+          if (isset($opciones['documento'])){?>
+        <td><?php echo $datos['documento'];?></td>
+    <?php } ?>
         <td><?php echo $datos['fecha'];?></td>
+    <?php
+         if (isset($opciones['subcta'])){?>
         <td><?php echo $datos['subcta'];?></td>
+    <?php }
+         if (isset($opciones['contrapartida'])){?>
         <td><?php echo $datos['contra'];?></td>
+    <?php } ?>
         <td><?php echo $registro->nif;?>
         <td><?php echo $registro->CONCEPTO;?>
         </td>
@@ -133,20 +154,16 @@ echo '</pre>';
 
 
     <?php }
-    echo '<tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><b>TOTAL</b></td>
-            <td><b>'.$suma['totalBases'].'</b></td>'
+    
+    echo '<tr>'.
+            str_repeat ('<td class="a"></td>',count($opciones)+3)
+            .'<td><b>TOTAL</b></td>
+            <td class="text-right"><b>'.$suma['totalBases'].'</b></td>'
             .'<td></td>'
-            .'</td><td><b>'.$suma['totalCuotas'].'</b></td>'
-            .'</td><td><b>'.$suma['total'].'</b></td>'
+            .'</td><td class="text-right"><b>'.$suma['totalCuotas'].'</b></td>'
+            .'</td><td class="text-right"><b>'.$suma['total'].'</b></td>'
 
-        .'</td></tr>';
+        .'</tr>';
     ?>
   </tbody>
 </table>

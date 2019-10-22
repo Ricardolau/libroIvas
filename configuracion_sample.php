@@ -1,9 +1,12 @@
 <?php
-    // Las rutas no lleva separador al final.
-    $ruta_proyecto='ruta donde esta el proyecto alojado'; //(String) Ruta del proyecto.
-                                                    // recomiendo que no este dentro public_hmtl
-	$server ='nombre del servidor de la base datos';
-	$base ='nombre de la base de datos';
-	$usuario='Usuario de la base datos con permiso total';
-	$contrasena='contraseña del usuario de la base datos';
+    // Las ruta completa donde esta el proyecto
+    $ruta_proyecto='';  //(String) Ruta del proyecto.
+    // Datos de la empresa para que aparezca en los listados
+    $empresa = '';
+    $cif = '';
+    // Datos donde esta los datos en Mysql
+	$server ='';        // Servidor de mysql
+	$base ='';          // Nombre base de datos
+	$usuario='';        // Nombre usuario
+	$contrasena='';     // Contraseña
 ?>

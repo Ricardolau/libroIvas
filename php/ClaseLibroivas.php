@@ -3,18 +3,30 @@ include_once ('ClaseModeloP.php');
 Class LibroIvas extends ModeloP {
     private $fecha_inicio;
     private $fecha_final;
+    private $tipo = ''; // Tipo de listado que vamos ejecutar.
+    public $campos =array(); // Campo opcionales a mostrar.
+    public $ivas = array(  '4'=> 0,'10'=>0,'21'=>0); // Valores a cero de los ivas.
     
     public function comprobarPost($post=''){
         $ok = 'KO';
         if (isset($post['emitido'])){
             $ok = 'OK';
+            $this->tipo = 'emitido';
         }
         if (isset($post['soportado'])) {
-            $ok = 'OK';
+            if ($this->tipo===''){
+                $ok = 'OK';
+                $this->tipo = 'soportado';
+            } else {
+                // Ya entro en emitido y no entra soportado.
+                // no permitimos continuar
+                $ok = 'KO';
+            }
         }
+        $this->setOpcionCampos($post);
         
-        $this->fecha_inicio = $_POST['fecha_inicio'];
-        $this->fecha_final = $_POST['fecha_final'];
+        $this->fecha_inicio = $post['fecha_inicio'];
+        $this->fecha_final = $post['fecha_final'];
 
         return $ok;
     }
@@ -46,7 +58,7 @@ Class LibroIvas extends ModeloP {
 
     public function getEmitidos(){
         $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47700000" AND `SUBCTA`<="47700099" AND FECHA>="'
-			  .$this->fecha_inicio.'" AND FECHA<="'.$this->fecha_final.'" ORDER BY `FECHA` ASC';
+			  .$this->fecha_inicio.'" AND FECHA<="'.$this->fecha_final.'" ORDER BY `FECHA`,DOCUMENTO ASC';
         $registros = parent::query($sql,'SELECT');
         // Obtenemos datos que nos falta.
         $registros = $this->setMasDatos($registros,'emitidos');
@@ -70,7 +82,7 @@ Class LibroIvas extends ModeloP {
         // @ Objetivo
         // Es añadir datos que falta:
         //  - Total de cada asiento
-        //  - Obtener Nombre y DNI de contrapartida
+        //  - Obtener Nombre y DNI de contrapartida de tabla subcta
         $total = 0;
         $n_registro = count($registros['items']);
         foreach ( $registros['items'] as $key=>$registro){
@@ -83,21 +95,15 @@ Class LibroIvas extends ModeloP {
                 $cuota_iva= $registro->EUROHABER;
             } else {
                 $cuota_iva= $registro->EURODEBE;
-                // Si existe HABER, quiere decir que la bas es negativo y el iva tambien.
+                // Si existe HABER, quiere decir que es negativo tanto base como cuota iva.
                 if (floatval($registro->EUROHABER) >0){
-                    $registro->BASEEURO =-$registro->BASEEURO ;
-                    $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
-                    $cuota_iva= $registro->EUROHABER*(-1);
-                    $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
-                    $registros['items'][$key]->EURODEBE = $cuota_iva;
+                    $registros['items'][$key]->BASEEURO =-$registro->BASEEURO;
+                    $registros['items'][$key]->EURODEBE =-$registro->EUROHABER;
                 }
 
             }
             
             $total = $total+($registro->BASEEURO +$cuota_iva);
-            if ($registro->ASIEN <> $asiento_anterior){
-                $asiento_anterior=$registro->ASIEN;
-            }
             if ( $registros['items'][$key+1]->ASIEN <> $registros['items'][$key]->ASIEN){
                 $registros['items'][$key]->{'total'}=$total;
                 $total = 0;
@@ -117,11 +123,23 @@ Class LibroIvas extends ModeloP {
 		
 			return $this->fecha_final;
 	}
+    public function setOpcionCampos($post){
+        // Saber que campos se muestra de los opcionales
+        $campos = array('asiento','subcta','documento','contrapartida');
+        $opcionales= [];
+        foreach ($campos as $campo){
+            if (isset($post[$campo])){
+                $opcionales +=  array($campo =>$post[$campo]);
+            }
+        }
+        $this->campos = $opcionales;
+    }
+
 
     public function getTrimestres(){
         // @ Objetivo
         // Enviar array con los periodos 
-        $trimestres =array(  1 =>array(
+        $trimestres =array( 1 =>array(
                              'fi'=>'2019-01-01',
                              'ff'=>'2019-03-31'
                             ),
@@ -138,10 +156,38 @@ Class LibroIvas extends ModeloP {
                             'ff'=>'2019-12-31'
                             )
                         );
+        $eliminados = [] ; // Bandera para eliminar trimestres que no esten entre las fechas indicadas.
+        foreach ($trimestres as $key=>$trimestre){
+            if ($this->fecha_inicio > $trimestre['ff'] || $this->fecha_final < $trimestre['fi']){
+                // Quiere decir que ese trimestre no se suba.
+                $eliminados[] = $key;
+            }
+        }
+        // Eliminaos de array los trimestres que no corresponde.
+        foreach ($eliminados as $a){
+            unset($trimestres[$a]);
+        }
         return $trimestres;
-        
-        
+    }
 
+    public function getTituloInforme(){
+        // @Objetivo:
+        // Obtener el html del titulo del listado.
+
+        $html =  '<h1>Libros de iva '.$this->tipo.'</h1>'
+                .'<p><b>'.$this->empresa.'</b> - CIF: '.$this->cif.'</p>'
+                .'<p>Fecha inicio:'.$this->getFecha_inicial().' a fecha final:'.$this->getFecha_final().'</p>';
+
+        return $html;
+    }
+
+    public function getfecha($fecha_original){
+        //@ Objetivo
+        // Recibo fecha formato Y-m-d y devuelvo formato d-m-y
+        $fecha = date_create_from_format('Y-m-d', $fecha_original);
+        $fecha = date_format($fecha,'d-m-Y');
+        return $fecha;
+    
     }
 
 }

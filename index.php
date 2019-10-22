@@ -48,6 +48,38 @@ $libroIvas = new Libroivas();
             </div>
             <div class="row">
                 <legend>
+                    Campos a mostrar generales:
+                </legend>
+                <div class="col">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="asiento" id="asiento_id" checked>
+                    <label class="form-check-label" for="asiento">
+                    Numeros de asiento
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="subcta" id="subcta_id" checked>
+                    <label class="form-check-label" for="subcta">
+                    Numeros de subcuenta
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="documento" id="documento_id" checked>
+                    <label class="form-check-label" for="documento">
+                    Numeros de Documento(tpv) 
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="contrapartida" id="contrapartida_id" checked>
+                    <label class="form-check-label" for="contrapartida">
+                    Numeros de contrapartida 
+                    </label>
+                </div>
+                
+                </div>
+            </div>
+            <div class="row">
+                <legend>
                 </legend>
                 <button type="submit" class="btn btn-primary mb-2">Solicitar Listado</button>
             </div>

@@ -23,6 +23,9 @@ class ModeloP {
 		$this->db = $conexion->conexion;
         $this->ruta_proyecto = $conexion->ruta_proyecto;
         $this->estado = $conexion->estado;
+        $this->empresa = $conexion->empresa;
+        $this->cif = $conexion->cif;
+
 	}
 
     public function insert($tabla, $datos, $soloSQL = false) {

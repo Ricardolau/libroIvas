@@ -11,7 +11,8 @@ class ClaseConexion {
 	private $base;
 	private $usuario;
 	private $contrasena;
-	
+	public $empresa;
+    public $cif;
 	
 	public function __construct()
 	{
@@ -48,10 +49,12 @@ class ClaseConexion {
 	
 	public function cargarConfiguracion(){
 		include ($this->ruta_proyecto.'/configuracion.php');
-		$this->server =$server;
-		$this->base = $base;
-		$this->usuario = $usuario;
-		$this->contrasena = $contrasena;
+		$this->server       = $server;
+		$this->base         = $base;
+		$this->usuario      = $usuario;
+		$this->contrasena   = $contrasena;
+        $this->empresa      = $empresa;
+        $this->cif          = $cif;
 		return;
 	}
 }
