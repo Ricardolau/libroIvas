@@ -121,13 +121,10 @@ $opciones = $libroIvas->campos;
          if (isset($opciones['subcta'])){?>
         <td><?php echo $datos['subcta'];?></td>
     <?php }
-         if (isset($opciones['contrapartida'])){?>
+    ?>
         <td><?php echo $datos['contra'];?></td>
-    <?php } ?>
-        <td><?php echo $datos['nif'];?>
-        <td><?php echo $datos['nombre'];?>
-        <td><?php echo $registro->CONCEPTO;?>
-        </td>
+        <td><?php echo $datos['nif'];?></td>
+        <td><?php echo $registro->CONCEPTO;?></td>
         <td class="text-right"><?php echo $registro->BASEEURO;?></td>
         <td class="text-right"><?php echo $registro->IVA;?></td>
         <td class="text-right"><?php echo $registro->EUROHABER;?></td>

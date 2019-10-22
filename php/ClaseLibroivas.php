@@ -98,7 +98,7 @@ Class LibroIvas extends ModeloP {
                 $datos= array( 'fecha'     => $fecha,
                                 'n_asiento' => $registro->ASIEN,
                                 'subcta'    => $registro->SUBCTA,
-                                'contra'    => $registro->CONTRA.' '.$registro->nombre,
+                                'contra'    => $registro->CONTRA.' '.$datos_contra['items'][0]->TITULO,
                                 'documento' => $registro->DOCUMENTO
                             );
                             $total = 0;
@@ -112,6 +112,8 @@ Class LibroIvas extends ModeloP {
             }
             $datos['nif'] = $datos_contra['items'][0]->NIF;
             $datos['nombre'] = $datos_contra['items'][0]->TITULO;
+
+            
             //~ $registros['items'][$key]->{'nif'}     = $datos_contra['items'][0]->NIF;
             //~ $registros['items'][$key]->{'nombre'}  = $datos_contra['items'][0]->TITULO;
             if ($tipo === 'emitidos'){
@@ -150,7 +152,7 @@ Class LibroIvas extends ModeloP {
 	}
     public function setOpcionCampos($post){
         // Saber que campos se muestra de los opcionales
-        $campos = array('asiento','subcta','documento','contrapartida');
+        $campos = array('asiento','subcta','documento');
         $opcionales= [];
         foreach ($campos as $campo){
             if (isset($post[$campo])){
