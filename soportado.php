@@ -79,31 +79,17 @@ $opciones = $libroIvas->campos;
                    );
     foreach ($registros as $registro){
         $asiento = $registro->ASIEN;
-        
+        $datos = $registro->datos;
+        $row= '';
+        $class_row = '';
         if ($asiento <> $asiento_anterior){
             $key++;
             $row = $key;
             $class_row = ' class="inicio"';
             $asiento_anterior=$asiento;
-            $fecha = $libroIvas->getfecha($registro->FECHA);
-            $datos = array( 'fecha'     => $fecha,
-                            'n_asiento' => $registro->ASIEN,
-                            'subcta'    => $registro->SUBCTA,
-                            'contra'    => $registro->CONTRA,
-                            'documento' => $registro->DOCUMENTO
-                        );
-        } else {
-            $row= '';
-            $class_row = '';
-            $datos = array( 'fecha'     => '',
-                            'n_asiento' => '',
-                            'subcta'    => '',
-                            'contra'    => '',
-                            'documento' => ''
-                        );
         }
-        if (isset($registro->total)){
-            $suma['total'] += $registro->total;
+        if (isset($datos['total'])){
+            $suma['total'] += $datos['total'];
         }
         
         $suma['totalBases'] += $registro->BASEEURO;;
@@ -140,16 +126,16 @@ $opciones = $libroIvas->campos;
          if (isset($opciones['contrapartida'])){?>
         <td><?php echo $datos['contra'];?></td>
     <?php } ?>
-        <td><?php echo $registro->nif;?>
-        <td><?php echo $registro->nombre;?>
+        <td><?php echo $datos['nif'];?>
+        <td><?php echo $datos['nombre'];?>
         <td><?php echo $registro->CONCEPTO;?>
         </td>
         <td class="text-right"><?php echo $registro->BASEEURO;?></td>
         <td class="text-right"><?php echo $registro->IVA;?></td>
         <td class="text-right"><?php echo $registro->EURODEBE;?></td>
         <td class="text-right"><?php
-            if (isset($registro->total)){
-                echo '<b>'.number_format ($registro->total,2,"."," ").'</b>';
+            if (isset($datos['total'])){
+                echo '<b>'.number_format ($datos['total'],2,"."," ").'</b>';
             }?>
         </td>
     </tr>

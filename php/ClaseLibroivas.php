@@ -86,11 +86,34 @@ Class LibroIvas extends ModeloP {
         $total = 0;
         $n_registro = count($registros['items']);
         foreach ( $registros['items'] as $key=>$registro){
+            // Obtenemos numero registro anterior y siguiente
+            $previos = $key-1;
+            $next = $key+1;
             // Obtenemos Nombre y NIF subcuenta.
             $sql = 'SELECT * FROM `subcta` WHERE `COD`="'.$registro->CONTRA.'"';
             $datos_contra = parent::query($sql,'SELECT');
-            $registros['items'][$key]->{'nif'}     = $datos_contra['items'][0]->NIF;
-            $registros['items'][$key]->{'nombre'}  = $datos_contra['items'][0]->TITULO;
+            $datos =[];
+            if ($previos < 0 || $registros['items'][$previos]->ASIEN <> $registro->ASIEN){
+                $fecha = $this->getfecha($registro->FECHA);
+                $datos= array( 'fecha'     => $fecha,
+                                'n_asiento' => $registro->ASIEN,
+                                'subcta'    => $registro->SUBCTA,
+                                'contra'    => $registro->CONTRA.' '.$registro->nombre,
+                                'documento' => $registro->DOCUMENTO
+                            );
+                            $total = 0;
+            } else {
+                $datos = array( 'fecha'     => '',
+                                'n_asiento' => '',
+                                'subcta'    => '',
+                                'contra'    => '',
+                                'documento' => ''
+                            );
+            }
+            $datos['nif'] = $datos_contra['items'][0]->NIF;
+            $datos['nombre'] = $datos_contra['items'][0]->TITULO;
+            //~ $registros['items'][$key]->{'nif'}     = $datos_contra['items'][0]->NIF;
+            //~ $registros['items'][$key]->{'nombre'}  = $datos_contra['items'][0]->TITULO;
             if ($tipo === 'emitidos'){
                 $cuota_iva= $registro->EUROHABER;
             } else {
@@ -104,12 +127,14 @@ Class LibroIvas extends ModeloP {
             }
             
             $total = $total+($registro->BASEEURO +$cuota_iva);
-            if ( $registros['items'][$key+1]->ASIEN <> $registros['items'][$key]->ASIEN){
-                $registros['items'][$key]->{'total'}=$total;
-                $total = 0;
+            if ( $next === $n_registros || $registros['items'][$next]->ASIEN <> $registro->ASIEN){
+                $datos['total'] = $total;
             }
+            // Añadimos $datos al item de registro.
+            $registros['items'][$key]->{'datos'}=$datos;
             
         }
+        
         return $registros;
 
     }
