@@ -3,7 +3,6 @@ include_once ('ClaseModeloP.php');
 Class LibroIvas extends ModeloP {
     private $fecha_inicio;
     private $fecha_final;
-
     
     public function comprobarPost($post=''){
         $ok = 'KO';
@@ -59,7 +58,6 @@ Class LibroIvas extends ModeloP {
      public function getSoportados(){
         $sql ='SELECT * FROM `diario` WHERE `SUBCTA`>="47200000" AND `SUBCTA`<="47200099" AND FECHA>="'
 			  .$this->fecha_inicio.'" AND FECHA<="'.$this->fecha_final.'" ORDER BY `FECHA` ASC ';
-		error_log($sql);
         $registros = parent::query($sql,'SELECT');
         $registros = $this->setMasDatos($registros,'soportados');
 
@@ -74,7 +72,7 @@ Class LibroIvas extends ModeloP {
         //  - Total de cada asiento
         //  - Obtener Nombre y DNI de contrapartida
         $total = 0;
-        $asiento_anterior = 0;
+        $n_registro = count($registros['items']);
         foreach ( $registros['items'] as $key=>$registro){
             // Obtenemos Nombre y NIF subcuenta.
             $sql = 'SELECT * FROM `subcta` WHERE `COD`="'.$registro->CONTRA.'"';
@@ -87,15 +85,11 @@ Class LibroIvas extends ModeloP {
                 $cuota_iva= $registro->EURODEBE;
                 // Si existe HABER, quiere decir que la bas es negativo y el iva tambien.
                 if (floatval($registro->EUROHABER) >0){
-                    error_log('tipo'.gettype($registro->EUROHABER));
                     $registro->BASEEURO =-$registro->BASEEURO ;
                     $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
                     $cuota_iva= $registro->EUROHABER*(-1);
                     $registros['items'][$key]->BASEEURO =-$registro->BASEEURO*(-1);
                     $registros['items'][$key]->EURODEBE = $cuota_iva;
-
-
-                    error_log('Cuota:'.$cuota_iva.' Base:'. $registro->BASEEURO);
                 }
 
             }
@@ -123,5 +117,31 @@ Class LibroIvas extends ModeloP {
 		
 			return $this->fecha_final;
 	}
+
+    public function getTrimestres(){
+        // @ Objetivo
+        // Enviar array con los periodos 
+        $trimestres =array(  1 =>array(
+                             'fi'=>'2019-01-01',
+                             'ff'=>'2019-03-31'
+                            ),
+                            2 =>array(
+                            'fi'=>'2019-04-01',
+                            'ff'=>'2019-06-30'
+                            ),
+                            3 =>array(
+                            'fi'=>'2019-07-01',
+                            'ff'=>'2019-09-30'
+                            ),
+                            4 =>array(
+                            'fi'=>'2019-10-01',
+                            'ff'=>'2019-12-31'
+                            )
+                        );
+        return $trimestres;
+        
+        
+
+    }
 
 }

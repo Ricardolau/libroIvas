@@ -47,13 +47,20 @@ echo '</pre>';
     <?php
     $key = 0;
     $asiento_anterior = 0;
+    $ivas = array(  '4'=> 0,'10'=>0,'21'=>0);
     $suma = array( 'total' =>0,
-                   'base_4' => 0,
-                   'base_10' => 0,
-                   'base_21' => 0,
-                   'iva_4' => 0,
-                   'iva_10' => 0,
-                   'iva_21' => 0
+                   'base' => array (1 =>$ivas,
+                                    2 =>$ivas,
+                                    3 =>$ivas,
+                                    4 =>$ivas
+                                    ),
+                   'cuota_iva' =>array (1 =>$ivas,
+                                    2 =>$ivas,
+                                    3 =>$ivas,
+                                    4 =>$ivas
+                                    ),
+                   'totalBases' =>0,
+                   'totalCuotas'=>0
                    );
     foreach ($registros as $registro){
         $asiento = $registro->ASIEN;
@@ -84,26 +91,28 @@ echo '</pre>';
         if (isset($registro->total)){
             $suma['total'] = $suma['total'] +$registro->total;
         }
-        if ($registro->IVA==="4.00"){
-            $suma['base_4'] = $suma['base_4']+$registro->BASEEURO;
-            $suma['iva_4'] = $suma['iva_4']+$registro->EURODEBE;
-        }
-        if ($registro->IVA==="10.00"){
-            $suma['base_10'] = $suma['base_10']+$registro->BASEEURO;
-            $suma['iva_10'] = $suma['iva_10']+$registro->EURODEBE;
-        }
-        if ($registro->IVA==="21.00"){
-            $suma['base_21'] = $suma['base_21']+$registro->BASEEURO;
-            $suma['iva_21'] = $suma['iva_21']+$registro->EURODEBE;
-        }
+        
         $suma['totalBases'] = $suma['totalBases'] +$registro->BASEEURO;;
         $suma['totalCuotas'] = $suma['totalCuotas'] +$registro->EURODEBE;
-        //~ //foreach ($registros as $key=>$registro) {
-        //~ if($key <10){
-        //~ echo '<tr><th><pre>';
-        //~ print_r($registro);
-        //~ echo '</pre></th></tr>';
-         //~ }
+        $trimestres = $libroIvas->getTrimestres();
+        foreach ($trimestres as $k=>$trimestre){
+            if ($registro->FECHA >=$trimestre['fi'] and $registro->FECHA <=$trimestre['ff']){
+                if ($registro->IVA==="4.00"){
+                    $suma['base'][$k]['4']= $suma['base'][$k]['4']+$registro->BASEEURO;
+                    $suma['cuota_iva'][$k]['4'] = $suma['cuota_iva'][$k]['4']+$registro->EURODEBE;
+                }
+                if ($registro->IVA==="10.00"){
+                     $suma['base'][$k]['10']= $suma['base'][$k]['10']+$registro->BASEEURO;
+                    $suma['cuota_iva'][$k]['10'] = $suma['cuota_iva'][$k]['10']+$registro->EURODEBE;
+                }
+                if ($registro->IVA==="21.00"){
+                    $suma['base'][$k]['21']= $suma['base'][$k]['21']+$registro->BASEEURO;
+                    $suma['cuota_iva'][$k]['21'] = $suma['cuota_iva'][$k]['21']+$registro->EURODEBE;
+                }
+            }
+        }
+
+        
     ?>
    
 
@@ -149,8 +158,11 @@ echo '</pre>';
     ?>
   </tbody>
 </table>
+<div class="row">
+
+<?php foreach ($trimestres as $k=>$trimestre){ ?>
 <div class="col-sm-6">
-    <h4>Desglose de ivas</h4>
+    <h4>Resumen de trimestre <?php echo $k?></h4>
     <table class="table">
         <thead>
         <tr>
@@ -161,20 +173,20 @@ echo '</pre>';
       </thead>
       <tbody>
         <?php
-         echo '<tr><th> 4%</th><td>'
-            .number_format ($suma['base_4'],2,"."," ").'<td>'.number_format ($suma['iva_4'],2,"."," ").'</td>'
+         foreach ($ivas as $x=>$iva){
+            echo '<tr><th>'.$x.'%</th><td>'
+            .number_format ($suma['base'][$k][$x],2,"."," ").'<td>'.number_format ($suma['cuota_iva'][$k][$x],2,"."," ").'</td>'
             .'</td></tr>';
-        echo '<tr><th> 10%</th><td>'
-            .number_format ($suma['base_10'],2,"."," ").'<td>'.number_format ($suma['iva_10'],2,"."," ").'</td>'
-            .'</td></tr>';
-        echo '<tr><th> 4%</th><td>'
-            .number_format ($suma['base_21'],2,"."," ").'<td>'.number_format ($suma['iva_21'],2,"."," ").'</td>'
-            .'</td></tr>';
+         }
         
         ?>
     </tbody>
     </table>
 </div>
+<?php }
+?>
 </div>
+</div>
+
 </body>
 </html>
