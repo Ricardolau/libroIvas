@@ -8,6 +8,7 @@ Class LibroIvas extends ModeloP {
     public $ivas = array(  '4'=> 0,'10'=>0,'21'=>0); // Valores a cero de los ivas.
     
     public function comprobarPost($post=''){
+        // Sería el constructor... :-)
         $ok = 'KO';
         if (isset($post['emitido'])){
             $ok = 'OK';
@@ -40,7 +41,7 @@ Class LibroIvas extends ModeloP {
         // $tipo        -> (string) Donde indicamos si es: info, danger o warning
         // $parametros  -> (array) Podemos mandar los parametros que necesite el mensaje.
 
-        // Array de mensajes
+        // Array de mensajes-> NO LO UTILIZO DE MOMENTO.
 
         $mensaje = array(
                         
@@ -83,6 +84,7 @@ Class LibroIvas extends ModeloP {
         // Es añadir datos que falta:
         //  - Total de cada asiento
         //  - Obtener Nombre y DNI de contrapartida de tabla subcta
+        //  - Añadir al objeto de cada registro un array (datos)
         $total = 0;
         $n_registro = count($registros['items']);
         foreach ( $registros['items'] as $key=>$registro){
@@ -92,9 +94,10 @@ Class LibroIvas extends ModeloP {
             // Obtenemos Nombre y NIF subcuenta.
             $sql = 'SELECT * FROM `subcta` WHERE `COD`="'.$registro->CONTRA.'"';
             $datos_contra = parent::query($sql,'SELECT');
-            $datos =[];
+            $datos =[]; // El array que vamos añadir al registro.
             if ($previos < 0 || $registros['items'][$previos]->ASIEN <> $registro->ASIEN){
                 $fecha = $this->getfecha($registro->FECHA);
+                
                 $datos= array( 'fecha'     => $fecha,
                                 'n_asiento' => $registro->ASIEN,
                                 'subcta'    => $registro->SUBCTA,
@@ -112,16 +115,13 @@ Class LibroIvas extends ModeloP {
             }
             $datos['nif'] = $datos_contra['items'][0]->NIF;
             $datos['nombre'] = $datos_contra['items'][0]->TITULO;
-
-            
-            //~ $registros['items'][$key]->{'nif'}     = $datos_contra['items'][0]->NIF;
-            //~ $registros['items'][$key]->{'nombre'}  = $datos_contra['items'][0]->TITULO;
             if ($tipo === 'emitidos'){
                 $cuota_iva= $registro->EUROHABER;
             } else {
                 $cuota_iva= $registro->EURODEBE;
                 // Si existe HABER, quiere decir que es negativo tanto base como cuota iva.
                 if (floatval($registro->EUROHABER) >0){
+                    // Cambio el valor de base y eurodebe a negativo, ya que son negativas al estar haber.
                     $registros['items'][$key]->BASEEURO =-$registro->BASEEURO;
                     $registros['items'][$key]->EURODEBE =-$registro->EUROHABER;
                 }
@@ -130,6 +130,7 @@ Class LibroIvas extends ModeloP {
             
             $total = $total+($registro->BASEEURO +$cuota_iva);
             if ( $next === $n_registros || $registros['items'][$next]->ASIEN <> $registro->ASIEN){
+                // Si esta en ultimo registro o va cambiar de asiento.
                 $datos['total'] = $total;
             }
             // Añadimos $datos al item de registro.
@@ -165,7 +166,7 @@ Class LibroIvas extends ModeloP {
 
     public function getTrimestres(){
         // @ Objetivo
-        // Enviar array con los periodos 
+        // Enviar array con los periodos que entre fecha inicio y final
         $trimestres =array( 1 =>array(
                              'fi'=>'2019-01-01',
                              'ff'=>'2019-03-31'
